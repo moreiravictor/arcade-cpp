@@ -2,6 +2,12 @@
 #include <SFML/Audio.hpp>
 #include <sstream>
 #include <iostream>
+#include "pad.h"
+#include "Ball.h"
+#include "Score.h"
+
+sf::Sound configSound(std::string file_path);
+int loadFromFile(sf::SoundBuffer buffer, std::string file_path);
 
 int main() {
 	
@@ -12,7 +18,6 @@ int main() {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Julhinho's adventure");
 	//general configs
 	window.setFramerateLimit(60);
-	window.setKeyRepeatEnabled(true);
 	
 	//states for events and buttons
 	bool play = true;
@@ -20,80 +25,44 @@ int main() {
 	bool sPressed = false;
 	bool upPressed = false;
 	bool downPressed = false;
+	
+	//outside file paths
+	std::string pad_texture = "data/image1.png";
+	std::string ball_texture = "data/jubilu.png";
+	std::string font_path = "data/arial.ttf";
+	std::string back_path = "data/forest.png";
+	std::string hit_path = "data/hit.wav";
+	std::string theme_path = "data/theme.ogg";
+	
+	//objects
+	Pad *pad_1 = new Pad(20, 200, pad_texture, 50, 200);
+	Pad *pad_2 = new Pad(730, 200, pad_texture, 50, 200);
+	Ball *ball = new Ball(300, 300, -6, -6, ball_texture, 100, 100);
+	Score *score = new Score(350, 10, 30, font_path, sf::Color::Cyan);
 
-	//vars
-	float rect_1X = 20, rect_1Y = 200, rect_1points = 0;
-	float rect_2X = 730, rect_2Y = 200, rect_2points = 0;
-	float ballSpeedX = -6, ballSpeedY = -6;
-
-	//font
-	sf::Font arial;
-	if (!arial.loadFromFile("data/arial.ttf")) {
-		return 1;
-	}
-
-	//score
-	sf::Text score;
-	score.setFont(arial);
-	score.setFillColor(sf::Color::Cyan);
-	score.setCharacterSize(30);
-	score.setPosition(350, 10);
-
-	//images
-	sf::Texture wood;
-	if (!wood.loadFromFile("data/image1.png")) {
-		return 1;
-	}
-
+	//background
 	sf::Texture back;
-	if (!back.loadFromFile("data/forest.png")) {
+	if (!back.loadFromFile(back_path)) {
 		return 1;
 	}
 	sf::Sprite sprite;
 	sf::Vector2u size = back.getSize();
 	sprite.setTexture(back);
 
-	sf::Texture jubilu;
-	if (!jubilu.loadFromFile("data/jubilu.png")) {
-		return 1;
-	}
-
-
-	//render shapes
-	sf::RectangleShape rect_1;
-	rect_1.setTexture(&wood);
-	rect_1.setSize(sf::Vector2f(50, 200));
-	rect_1.setPosition(rect_1X, rect_1Y);
-
-	sf::RectangleShape rect_2;
-	rect_2.setTexture(&wood);
-	rect_2.setSize(sf::Vector2f(50, 200));
-	rect_2.setPosition(rect_2X, rect_2Y);
-
-	sf::RectangleShape ball;
-	ball.setTexture(&jubilu);
-	ball.setSize(sf::Vector2f(100, 100));
-	ball.setPosition(300, 300);
-
-
-
 	//sounds
-	sf::SoundBuffer hit;
-	if (!hit.loadFromFile("data/hit.wav")) {
-		return 1;
-	}
-	sf::Sound hit_sound;
-	hit_sound.setBuffer(hit);
+	sf::Sound hit_sound = configSound(hit_path);
 
 	sf::Music back_theme;
-	if (!back_theme.openFromFile("data/theme.ogg")) {
+	if (!back_theme.openFromFile(theme_path)) {
 		return 1;
 	}
 	back_theme.setVolume(10);
 	back_theme.setLoop(true);
 	back_theme.play();
 
+	//getting event
 	sf::Event event;
+
 	//game loop
 	while (play) {
 		//events
@@ -136,61 +105,62 @@ int main() {
 		//logic
 
 		//ball
-		ball.move(ballSpeedX, ballSpeedY);
+		ball->shape.move(ball->x_speed, ball->y_speed);
+		printf("%d %d \n", ball->x_speed, ball->y_speed);
 
-		if (ball.getPosition().y < 0) {
-			ballSpeedY = -ballSpeedY;
+		if (ball->shape.getPosition().y < 0) {
+			ball->y_speed = -ball->y_speed;
 		}
 
-		if (ball.getPosition().y > 400) {
-			ballSpeedY = -ballSpeedY;
+		if (ball->shape.getPosition().y > 500) {
+			ball->y_speed = -ball->y_speed;
 		}
 
-		if (ball.getGlobalBounds().intersects(rect_1.getGlobalBounds()) || ball.getGlobalBounds().intersects(rect_2.getGlobalBounds())) {
-			ballSpeedX = -ballSpeedX;
+		if (ball->shape.getGlobalBounds().intersects(pad_1->shape.getGlobalBounds()) || ball->shape.getGlobalBounds().intersects(pad_2->shape.getGlobalBounds())) {
+			ball->x_speed = -ball->x_speed;
 			hit_sound.play();
 		}
 
-		if (ball.getPosition().x < 0) {
-			ball.setPosition(300, 300);
-			rect_2points++;
+		if (ball->shape.getPosition().x < 0) {
+			ball->shape.setPosition(300, 300);
+			pad_2->points++;
 		}
-		if (ball.getPosition().x > 800) {
-			ball.setPosition(300, 300);
-			rect_1points++;
+		if (ball->shape.getPosition().x > 800) {
+			ball->shape.setPosition(300, 300);
+			pad_1->points++;
 		}
 
 
 		//pads
 		if (wPressed) {
-			if (rect_1Y > 0) rect_1Y-=5;
-			rect_1.setPosition(rect_1X, rect_1Y);
+			if (pad_1->y > 0) pad_1->y -=5;
+			pad_1->shape.setPosition(pad_1->x, pad_1->y);
 		}
 		if (sPressed) {
-			if (rect_1Y < 400) rect_1Y+=5;
-			rect_1.setPosition(rect_1X, rect_1Y);
+			if (pad_1->y < 400) pad_1->y +=5;
+			pad_1->shape.setPosition(pad_1->x, pad_1->y);
 		}
 		if (upPressed) {
-			if (rect_2Y > 0) rect_2Y -= 5;
-			rect_2.setPosition(rect_2X, rect_2Y);
+			if (pad_2->y > 0) pad_2->y -= 5;
+			pad_2->shape.setPosition(pad_2->x, pad_2->y);
 		}
 		if (downPressed) {
-			if (rect_2Y < 400) rect_2Y += 5;
-			rect_2.setPosition(rect_2X, rect_2Y);
+			if (pad_2->y < 400) pad_2->y += 5;
+			pad_2->shape.setPosition(pad_2->x, pad_2->y);
 		}
 
 		//rendering
 		window.clear();
 
 		window.draw(sprite);
-		window.draw(ball);
-		window.draw(rect_1);
-		window.draw(rect_2);
+		window.draw(ball->shape);
+		window.draw(pad_1->shape);
+		window.draw(pad_2->shape);
 
 		std::stringstream score_text;
-		score_text << rect_1points << " : " << rect_2points;
-		score.setString(score_text.str());
-		window.draw(score);
+		score_text << pad_1->points << " : " << pad_2->points;
+		score->score.setString(score_text.str());
+		window.draw(score->getScore());
 
 		window.display();
 	}
@@ -200,3 +170,17 @@ int main() {
 
 	return 0;
 }
+
+sf::Sound configSound(std::string file_path) {
+	sf::SoundBuffer hit;
+	loadFromFile(hit, file_path);
+	sf::Sound hit_sound;
+	hit_sound.setBuffer(hit);
+	return hit_sound;
+}
+
+int loadFromFile(sf::SoundBuffer buffer, std::string file_path) {
+	if (!buffer.loadFromFile(file_path)) {
+		return 1;
+	}
+ }
