@@ -6,6 +6,9 @@
 #include "Ball.h"
 #include "Score.h"
 
+sf::Sound configSound(std::string file_path);
+int loadFromFile(sf::SoundBuffer buffer, std::string file_path);
+
 int main() {
 	
 	//this is simply to supress an error caused by anne pro keyboard software
@@ -23,10 +26,13 @@ int main() {
 	bool upPressed = false;
 	bool downPressed = false;
 	
-	//texture paths
+	//outside file paths
 	std::string pad_texture = "data/image1.png";
 	std::string ball_texture = "data/jubilu.png";
 	std::string font_path = "data/arial.ttf";
+	std::string back_path = "data/forest.png";
+	std::string hit_path = "data/hit.wav";
+	std::string theme_path = "data/theme.ogg";
 	
 	//objects
 	Pad *pad_1 = new Pad(20, 200, pad_texture, 50, 200);
@@ -36,7 +42,7 @@ int main() {
 
 	//background
 	sf::Texture back;
-	if (!back.loadFromFile("data/forest.png")) {
+	if (!back.loadFromFile(back_path)) {
 		return 1;
 	}
 	sf::Sprite sprite;
@@ -44,21 +50,17 @@ int main() {
 	sprite.setTexture(back);
 
 	//sounds
-	sf::SoundBuffer hit;
-	if (!hit.loadFromFile("data/hit.wav")) {
-		return 1;
-	}
-	sf::Sound hit_sound;
-	hit_sound.setBuffer(hit);
+	sf::Sound hit_sound = configSound(hit_path);
 
 	sf::Music back_theme;
-	if (!back_theme.openFromFile("data/theme.ogg")) {
+	if (!back_theme.openFromFile(theme_path)) {
 		return 1;
 	}
 	back_theme.setVolume(10);
 	back_theme.setLoop(true);
 	back_theme.play();
 
+	//getting event
 	sf::Event event;
 
 	//game loop
@@ -168,3 +170,17 @@ int main() {
 
 	return 0;
 }
+
+sf::Sound configSound(std::string file_path) {
+	sf::SoundBuffer hit;
+	loadFromFile(hit, file_path);
+	sf::Sound hit_sound;
+	hit_sound.setBuffer(hit);
+	return hit_sound;
+}
+
+int loadFromFile(sf::SoundBuffer buffer, std::string file_path) {
+	if (!buffer.loadFromFile(file_path)) {
+		return 1;
+	}
+ }
