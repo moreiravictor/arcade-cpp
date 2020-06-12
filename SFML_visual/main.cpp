@@ -104,13 +104,14 @@ int main() {
 
 		//ball
 		ball->shape.move(ball->x_speed, ball->y_speed);
+		printf("%d %d \n", ball->x_speed, ball->y_speed);
 
 		if (ball->shape.getPosition().y < 0) {
 			ball->y_speed = -ball->y_speed;
 		}
 
-		if (ball->shape.getPosition().y > 400) {
-			ball->x_speed = -ball->x_speed;
+		if (ball->shape.getPosition().y > 500) {
+			ball->y_speed = -ball->y_speed;
 		}
 
 		if (ball->shape.getGlobalBounds().intersects(pad_1->shape.getGlobalBounds()) || ball->shape.getGlobalBounds().intersects(pad_2->shape.getGlobalBounds())) {
