@@ -13,10 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\classes">
+      <UniqueIdentifier>{976e14a0-320a-4e9b-bf2e-1cf83ff2191c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pad.h">
+      <Filter>Source Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Ball.h">
+      <Filter>Source Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Source Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Score.h">
+      <Filter>Source Files\classes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
